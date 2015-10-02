@@ -43,7 +43,7 @@ public class View extends UI {
     private void buildLayout() {
 
         createHeader();
-        createJPAView();
+      //  createJPAView();
 
         titleLayout = new HorizontalLayout(title);
         titleLayout.setSizeFull();
