@@ -2,9 +2,10 @@ package DAO.Impl;
 
 import DAO.ProductOnStorageDAO;
 import logic.ProductOnStorage;
-import org.hibernate.Session;
 import util.HibernateUtil;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,84 +16,87 @@ import java.util.List;
 
 public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
     public void AddProductToStorage(ProductOnStorage product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.save(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
+            transaction.begin();
+            manager.persist(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public void updateProductOnStorage(ProductOnStorage product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
+
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.update(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.merge(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public ProductOnStorage getProductById(int id) {
-        Session session = null;
-        ProductOnStorage product = null;
+        EntityManager manager = null;
+        ProductOnStorage productOnStorage = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            product = (ProductOnStorage) session.load(ProductOnStorage.class, id);
+            manager = HibernateUtil.getEM();
+            productOnStorage = (ProductOnStorage) manager.find(ProductOnStorage.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
-        return product;
+        return productOnStorage;
     }
 
     public List getAllProducts() {
-        Session session = null;
-        List<ProductOnStorage> products = new ArrayList<ProductOnStorage>();
+        EntityManager manager = null;
+        List<ProductOnStorage> productsOnStorage = new ArrayList<ProductOnStorage>();
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            products = session.createCriteria(ProductOnStorage.class).list();
+            manager = HibernateUtil.getEM();
+            productsOnStorage = manager.createQuery("select a from ProductOnStorage a", ProductOnStorage.class).getResultList();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
-        return products;
+        return productsOnStorage;
     }
 
     public void deleteProductFromStorage(ProductOnStorage product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.delete(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.remove(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
-
 }

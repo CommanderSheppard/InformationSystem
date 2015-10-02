@@ -5,6 +5,8 @@ import logic.Employee;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,81 +17,86 @@ import java.util.List;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
     public void AddEmployee(Employee employee) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.save(employee);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
+            transaction.begin();
+            manager.persist(employee);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public void updateEmployee(Employee employee) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
+
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.update(employee);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.merge(employee);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public Employee getEmployeeById(int id) {
-        Session session = null;
+        EntityManager manager = null;
         Employee employee = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            employee = (Employee) session.load(Employee.class, id);
+            manager = HibernateUtil.getEM();
+            employee = (Employee) manager.find(Employee.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return employee;
     }
 
     public List getAllEmployees() {
-        Session session = null;
+        EntityManager manager = null;
         List<Employee> employees = new ArrayList<Employee>();
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            employees = session.createCriteria(Employee.class).list();
+            manager = HibernateUtil.getEM();
+            employees = manager.createQuery("select a from Employee a", Employee.class).getResultList();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return employees;
     }
 
     public void deleteEmployee(Employee employee) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.delete(employee);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.remove(employee);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }

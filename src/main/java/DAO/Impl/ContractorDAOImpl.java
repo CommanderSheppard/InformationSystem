@@ -2,9 +2,10 @@ package DAO.Impl;
 
 import DAO.ContractorDAO;
 import logic.Contractor;
-import org.hibernate.Session;
 import util.HibernateUtil;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,83 +14,88 @@ import java.util.List;
  * Feel free to contact me via misharj1993@gmail.com
  */
 
-public class ContractorDAOImpl implements ContractorDAO{
-    public void AddContractor(Contractor contractor)  {
-        Session session = null;
+public class ContractorDAOImpl implements ContractorDAO {
+    public void AddContractor(Contractor contractor) {
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.save(contractor);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
+            transaction.begin();
+            manager.persist(contractor);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
-    public void updateContractor(Contractor contractor)  {
-        Session session = null;
+    public void updateContractor(Contractor contractor) {
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
+
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.update(contractor);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.merge(contractor);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
-    public Contractor getContractorById(int id)  {
-        Session session = null;
+    public Contractor getContractorById(int id) {
+        EntityManager manager = null;
         Contractor contractor = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            contractor = (Contractor) session.load(Contractor.class, id);
+            manager = HibernateUtil.getEM();
+            contractor = (Contractor) manager.find(Contractor.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return contractor;
     }
 
-    public List getAllContractors()  {
-        Session session = null;
+    public List getAllContractors() {
+        EntityManager manager = null;
         List<Contractor> contractors = new ArrayList<Contractor>();
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            contractors = session.createCriteria(Contractor.class).list();
+            manager = HibernateUtil.getEM();
+            contractors = manager.createQuery("select a from Contractor a", Contractor.class).getResultList();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return contractors;
     }
 
-    public void deleteContractor(Contractor contractor)  {
-        Session session = null;
+    public void deleteContractor(Contractor contractor) {
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.delete(contractor);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.remove(contractor);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }

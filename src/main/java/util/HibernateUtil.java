@@ -8,8 +8,33 @@ package util;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 public class HibernateUtil {
-    public static SessionFactory sessionFactory = null;
+
+    private static final EntityManagerFactory emf;
+    private static final String PERSISTENT_UNIT_NAME = "item-manager-pu";
+
+    static {
+        try {
+            emf = Persistence.createEntityManagerFactory(PERSISTENT_UNIT_NAME);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    public static EntityManager getEM() {
+        return emf.createEntityManager();
+    }
+
+
+
+
+
+
+ /*   public static SessionFactory sessionFactory = null;
 
     static {
         try {
@@ -22,4 +47,7 @@ public class HibernateUtil {
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
+
+    */
+
 }

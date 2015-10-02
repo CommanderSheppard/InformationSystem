@@ -2,9 +2,10 @@ package DAO.Impl;
 
 import DAO.ProductDAO;
 import logic.Product;
-import org.hibernate.Session;
 import util.HibernateUtil;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,81 +16,86 @@ import java.util.List;
 
 public class ProductDAOImpl implements ProductDAO {
     public void AddProduct(Product product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.save(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
+            transaction.begin();
+            manager.persist(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public void updateProduct(Product product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
+
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.update(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.merge(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }
 
     public Product getProductById(int id) {
-        Session session = null;
+        EntityManager manager = null;
         Product product = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            product = (Product) session.load(Product.class, id);
+            manager = HibernateUtil.getEM();
+            product = (Product) manager.find(Product.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return product;
     }
 
     public List getAllProducts() {
-        Session session = null;
+        EntityManager manager = null;
         List<Product> products = new ArrayList<Product>();
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            products = session.createCriteria(Product.class).list();
+            manager = HibernateUtil.getEM();
+            products = manager.createQuery("select a from Product a", Product.class).getResultList();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
         return products;
     }
 
     public void deleteProduct(Product product) {
-        Session session = null;
+        EntityTransaction transaction = null;
+        EntityManager manager = null;
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            session.delete(product);
-            session.getTransaction().commit();
+            manager = HibernateUtil.getEM();
+            transaction.begin();
+            manager.remove(product);
+            transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            if (manager != null && manager.isOpen()) {
+                manager.close();
             }
         }
     }

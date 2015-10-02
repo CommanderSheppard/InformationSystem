@@ -18,9 +18,9 @@ public class Contractor {
     @Column(name = "id")
     private int id;
     @Column(name = "contractor")
-    private String contractor; //shoukd be other type?
+    private String contractor; //should be other type?
     @Column(name = "overheads")
-    private double overheads;   //shout be what?
+    private double overheads;   //should be what?
 
     public int getId() {
         return id;
