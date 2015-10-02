@@ -39,6 +39,7 @@ public class ContractorDAOImpl implements ContractorDAO {
 
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
             manager.merge(contractor);
             transaction.commit();
@@ -56,7 +57,7 @@ public class ContractorDAOImpl implements ContractorDAO {
         Contractor contractor = null;
         try {
             manager = HibernateUtil.getEM();
-            contractor = (Contractor) manager.find(Contractor.class, id);
+            contractor = manager.find(Contractor.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -88,8 +89,13 @@ public class ContractorDAOImpl implements ContractorDAO {
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
-            manager.remove(contractor);
+            if (manager.contains(contractor)){
+                manager.remove(contractor);
+            }else{
+                manager.remove(manager.merge(contractor));
+            }
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();

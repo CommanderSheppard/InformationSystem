@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ProductDAOImpl implements ProductDAO {
     public void AddProduct(Product product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
@@ -34,11 +34,12 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     public void updateProduct(Product product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
 
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
             manager.merge(product);
             transaction.commit();
@@ -56,7 +57,7 @@ public class ProductDAOImpl implements ProductDAO {
         Product product = null;
         try {
             manager = HibernateUtil.getEM();
-            product = (Product) manager.find(Product.class, id);
+            product = manager.find(Product.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -69,7 +70,7 @@ public class ProductDAOImpl implements ProductDAO {
 
     public List getAllProducts() {
         EntityManager manager = null;
-        List<Product> products = new ArrayList<Product>();
+        List<Product> products = new ArrayList<>();
         try {
             manager = HibernateUtil.getEM();
             products = manager.createQuery("select a from Product a", Product.class).getResultList();
@@ -84,12 +85,17 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     public void deleteProduct(Product product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
-            manager.remove(product);
+            if (manager.contains(product)){
+                manager.remove(product);
+            }else{
+                manager.remove(manager.merge(product));
+            }
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();

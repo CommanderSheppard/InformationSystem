@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
     public void AddProductToStorage(ProductOnStorage product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
@@ -34,11 +34,12 @@ public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
     }
 
     public void updateProductOnStorage(ProductOnStorage product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
 
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
             manager.merge(product);
             transaction.commit();
@@ -56,7 +57,7 @@ public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
         ProductOnStorage productOnStorage = null;
         try {
             manager = HibernateUtil.getEM();
-            productOnStorage = (ProductOnStorage) manager.find(ProductOnStorage.class, id);
+            productOnStorage = manager.find(ProductOnStorage.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -69,7 +70,7 @@ public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
 
     public List getAllProducts() {
         EntityManager manager = null;
-        List<ProductOnStorage> productsOnStorage = new ArrayList<ProductOnStorage>();
+        List<ProductOnStorage> productsOnStorage = new ArrayList<>();
         try {
             manager = HibernateUtil.getEM();
             productsOnStorage = manager.createQuery("select a from ProductOnStorage a", ProductOnStorage.class).getResultList();
@@ -84,12 +85,17 @@ public class ProductOnStorageDAOImpl implements ProductOnStorageDAO {
     }
 
     public void deleteProductFromStorage(ProductOnStorage product) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
-            manager.remove(product);
+            if (manager.contains(product)){
+                manager.remove(product);
+            }else{
+                manager.remove(manager.merge(product));
+            }
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();

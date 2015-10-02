@@ -2,7 +2,6 @@ package DAO.Impl;
 
 import DAO.EmployeeDAO;
 import logic.Employee;
-import org.hibernate.Session;
 import util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
     public void AddEmployee(Employee employee) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
@@ -35,11 +34,12 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     public void updateEmployee(Employee employee) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
 
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
             manager.merge(employee);
             transaction.commit();
@@ -57,7 +57,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         Employee employee = null;
         try {
             manager = HibernateUtil.getEM();
-            employee = (Employee) manager.find(Employee.class, id);
+            employee = manager.find(Employee.class, id);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -70,7 +70,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 
     public List getAllEmployees() {
         EntityManager manager = null;
-        List<Employee> employees = new ArrayList<Employee>();
+        List<Employee> employees = new ArrayList<>();
         try {
             manager = HibernateUtil.getEM();
             employees = manager.createQuery("select a from Employee a", Employee.class).getResultList();
@@ -85,12 +85,17 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     public void deleteEmployee(Employee employee) {
-        EntityTransaction transaction = null;
+        EntityTransaction transaction;
         EntityManager manager = null;
         try {
             manager = HibernateUtil.getEM();
+            transaction = manager.getTransaction();
             transaction.begin();
-            manager.remove(employee);
+            if (manager.contains(employee)){
+                manager.remove(employee);
+            }else{
+                manager.remove(manager.merge(employee));
+            }
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
